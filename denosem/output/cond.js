@@ -1,0 +1,1 @@
+(env) => { if (((env) =>  ((env) => env['x'])(env) < ((env) => 42)(env))(env)) { return ((env) => Object.assign(env, {'lessThanFortyTwo': ((env) => true)(env)}))(env) } else { return ((env) => Object.assign(env, {'moreThanFortyTwo': ((env) => true)(env)}))(env) } }

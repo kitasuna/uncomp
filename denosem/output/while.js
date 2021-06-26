@@ -1,0 +1,1 @@
+(env) => { while (((env) =>  ((env) => env['x'])(env) < ((env) => 42)(env))(env)) { env = ((env) => { return ((env) => Object.assign(env, {'z': ((env) => ((env) => env['x'])(env) * ((env) => 2)(env))(env)}))(((env) => Object.assign(env, {'x': ((env) => ((env) => env['x'])(env) + ((env) => 1)(env))(env)}))(env)) })(env); } return env;}

@@ -1,0 +1,1 @@
+(env) => Object.assign(env, {'z': ((env) => ((env) => 32)(env) + ((env) => 10)(env))(env)})
