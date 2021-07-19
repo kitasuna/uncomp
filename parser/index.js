@@ -1,0 +1,1 @@
+(env) => { while (((env) =>  ((env) => env['x'])(env) < ((env) => 3)(env))(env)) { env = ((env) => Object.assign(env, {'x': ((env) => ((env) => env['x'])(env) + ((env) => 1)(env))(env)}))(env); } return env;}
