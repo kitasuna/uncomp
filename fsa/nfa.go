@@ -78,7 +78,8 @@ func NewNFA(rb NFARuleBook, curr []*State, acc []*State) NFA {
 }
 
 func (nfa *NFA) GetCurrentStates() []*State {
-	return nfa.RB.FollowFreeMoves(nfa.CurrentStates)
+	newCurrentStates := nfa.RB.FollowFreeMoves(nfa.CurrentStates)
+	return newCurrentStates
 }
 
 func (nfa *NFA) Accepting() bool {
