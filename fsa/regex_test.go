@@ -2,7 +2,6 @@ package main
 
 import (
 	// "reflect"
-	"fmt"
 	"testing"
 )
 
@@ -13,21 +12,17 @@ func Test_EmptyRegex(t *testing.T) {
 
 	nfa.ProcessString("")
 
-	fmt.Printf("CurrentStates: %v\n", nfa.CurrentStates)
-
 	if !nfa.Accepting() {
 		t.Error("Expected empty state to accept empty string")
 	}
 }
 
 func Test_LitRegex_OK(t *testing.T) {
-	literalA := Lit{'a'}
+	literalA := Lit{'b'}
 
 	nfa := literalA.ToNFA()
 
-	nfa.ProcessString("a")
-
-	fmt.Printf("CurrentStates: %v\n", nfa.CurrentStates)
+	nfa.ProcessString("b")
 
 	if !nfa.Accepting() {
 		t.Error("Expected Lit to accept single occurrence of its specified rune")
@@ -105,6 +100,44 @@ func Test_Concat_Recursion(t *testing.T) {
 	}
 }
 
+func Test_Concat_Choose(t *testing.T) {
+	literalA := Lit{'a'}
+	literalB := Lit{'b'}
+	empty := Empty{}
+
+	regex := Concat {
+		First: literalA,
+		Second: Choose {
+			First: literalB,
+			Second: empty,
+		},
+	}
+
+
+	tests := []struct {
+		Str string
+		Accepts bool
+	}{
+		{
+			Str: "a",
+			Accepts: true,
+		},
+		{
+			Str: "ab",
+			Accepts: true,
+		},
+	}
+
+	for _, tt := range tests {
+		nfa := regex.ToNFA()
+		nfa.ProcessString(tt.Str)
+
+		if nfa.Accepting() != tt.Accepts {
+			t.Errorf("Expected NFA to return %v the string `%v`, but got %v", tt.Accepts, tt.Str, nfa.Accepting())
+		}
+	}
+}
+
 func Test_Choose_FirstOK(t *testing.T) {
 	literalA := Lit{'a'}
 	literalB := Lit{'b'}
@@ -117,6 +150,33 @@ func Test_Choose_FirstOK(t *testing.T) {
 
 	if !nfa.Accepting() {
 		t.Error("Expected Choose to accept the string `a`")
+	}
+}
+
+func Test_Choose_EmptyFirstOK(t *testing.T) {
+	literalB := Lit{'b'}
+
+	choose := Choose { First: Empty{}, Second: literalB }
+
+	nfa := choose.ToNFA()
+
+	nfa.ProcessString("")
+
+	if !nfa.Accepting() {
+		t.Error("Expected Choose to accept the empty string")
+	}
+}
+
+func Test_Choose_EmptySecondOK(t *testing.T) {
+	literalB := Lit{'b'}
+
+	choose := Choose { First: literalB, Second: Empty{} }
+
+	nfa := choose.ToNFA()
+	nfa.ProcessString("b")
+
+	if !nfa.Accepting() {
+		t.Error("Expected Choose to accept the empty string")
 	}
 }
 
@@ -232,5 +292,60 @@ func Test_Repeat_Fail2(t *testing.T) {
 
 	if nfa.Accepting() {
 		t.Error("Expected Repeat to not accept the string `aab`")
+	}
+}
+
+func Test_BigOne(t *testing.T) {
+	literalA := Lit{'a'}
+	literalB := Lit{'b'}
+	big := Repeat {
+		Pattern: Concat {
+			First: literalA,
+			Second: Choose { First: Empty{}, Second: literalB },
+		},
+	}
+
+
+	tests := []struct {
+		Str string
+		Accepts bool
+	}{
+		{
+			Str: "a",
+			Accepts: true,
+		},
+		{
+			Str: "ab",
+			Accepts: true,
+		},
+		{
+			Str: "ab",
+			Accepts: true,
+		},
+		{
+			Str: "aba",
+			Accepts: true,
+		},
+		{
+			Str: "abab",
+			Accepts: true,
+		},
+		{
+			Str: "abaab",
+			Accepts: true,
+		},
+		{
+			Str: "abba",
+			Accepts: false,
+		},
+	}
+
+	for _, tt := range tests {
+		nfa := big.ToNFA()
+		nfa.ProcessString(tt.Str)
+
+		if nfa.Accepting() != tt.Accepts {
+			t.Errorf("Expected NFA to return %v the string `%v`, but got %v", tt.Accepts, tt.Str, nfa.Accepting())
+		}
 	}
 }

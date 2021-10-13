@@ -50,7 +50,7 @@ func (l Lit) GetPrecedence() int {
 }
 
 func (l Lit) ToNFA() NFA {
-	startState := &State { Label: fmt.Sprintf("Start%v", l.r) }
+	startState := &State { Label: fmt.Sprintf("Start(%v)", string(l.r)) }
 	readSingleRuneState := &State { Label: fmt.Sprintf("readSingleRune%v", string(l.r)) }
 	rulebook := NFARuleBook{
 		Rules: []NFARule{
@@ -157,8 +157,13 @@ func (r Repeat) ToNFA() NFA{
 	// Adding this so it can accept the empty string
 	addlStartState := &State{ "StartAcceptsEmpty" }
 
-	combinedRules := append(nfa.RB.Rules,
-		NFARule{TargetState: nfa.AcceptStates[0], Char: nil, NextState: nfa.CurrentStates[0]},
+	combinedRules := nfa.RB.Rules
+	for _, s := range nfa.AcceptStates {
+		combinedRules = append(combinedRules,
+		NFARule{TargetState: s, Char: nil, NextState:addlStartState},
+		)
+	}
+	combinedRules = append(combinedRules,
 		NFARule{TargetState: addlStartState, Char: nil, NextState: nfa.CurrentStates[0]},
 	)
 	return NewNFA(
@@ -166,27 +171,4 @@ func (r Repeat) ToNFA() NFA{
 		[]*State{addlStartState},
 		append(nfa.AcceptStates, addlStartState),
 	)
-}
-
-func try() {
-	aLit := &Lit{'a'}
-	bLit := &Lit{'b'}
-
-	c := Concat {First: aLit, Second: bLit}
-
-	r := Repeat {Pattern: aLit}
-
-	ch := Choose {First: aLit, Second: bLit}
-
-	big := Repeat {
-		Pattern: Choose{
-				First: Concat{ First: aLit, Second: bLit },
-				Second: aLit,
-			},
-	}
-
-	fmt.Printf("Concat'd: %v\n", c.String())
-	fmt.Printf("Repeat'd: %v\n", r.String())
-	fmt.Printf("Chose'd: %v\n", ch.String())
-	fmt.Printf("Big'd: %v\n", big.String())
 }

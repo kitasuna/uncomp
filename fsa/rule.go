@@ -14,8 +14,8 @@ func (r *Rule) AppliesTo(c rune, st *State) bool {
 	return r.TargetState == st && c == r.Char
 }
 
-func (r *Rule) String() string {
-	return fmt.Sprintf("%v -- %v ---> %v", *r.TargetState, r.Char, *r.NextState)
+func (r Rule) String() string {
+	return fmt.Sprintf("%v -- %v ---> %v", *r.TargetState, string(r.Char), *r.NextState)
 }
 
 func (r *Rule) Follow() *State {
@@ -44,8 +44,12 @@ func (r *NFARule) AppliesTo(c *rune, st *State) bool {
 	return false
 }
 
-func (r *NFARule) String() string {
-	return fmt.Sprintf("%v -- %v ---> %v", *r.TargetState, *r.Char, *r.NextState)
+func (r NFARule) String() string {
+	if r.Char != nil {
+		return fmt.Sprintf("%v -- %v ---> %v", r.TargetState, string(*r.Char), r.NextState)
+	}
+
+	return fmt.Sprintf("%v -- <nil> ---> %v", r.TargetState, r.NextState)
 }
 
 func (r *NFARule) Follow() *State {

@@ -234,3 +234,51 @@ func Test_NFAWithFreeMoves(t *testing.T) {
 
 	}
 }
+
+func Test_NFASimulation(t *testing.T) {
+	var st1 = &State { "State1" }
+	var st2 = &State { "State2" }
+	var st3 = &State { "State3" }
+
+	rb := NFARuleBook {
+		Rules: []NFARule{
+			{ TargetState: st1, Char: &inputRuneA, NextState: st1 },
+			{ TargetState: st1, Char: &inputRuneA, NextState: st2 },
+
+			{ TargetState: st2, Char: &inputRuneB, NextState: st3 },
+
+			{ TargetState: st3, Char: &inputRuneB, NextState: st1 },
+			{ TargetState: st3, Char: nil, NextState: st2 },
+
+		},
+	}
+
+	tests := []struct{
+		Input string
+		ShouldAccept bool
+	}{
+		{  "a", false },
+		{  "aa", false },
+		{  "ab", true },
+		{  "abb", true },
+	}
+
+	startStates := []*State{st1}
+	acceptStates := []*State{st3}
+	for _, tt := range tests {
+		nfa := NewNFA(rb, startStates, acceptStates)
+		nfa.ProcessString(tt.Input)
+
+		if nfa.Accepting() != tt.ShouldAccept {
+			t.Errorf("For::\nstart states %v\naccept states %v\ncurrent states: %v\ninput '%s'\nWanted %v, got %v",
+				startStates,
+				acceptStates,
+				nfa.CurrentStates,
+				tt.Input,
+				tt.ShouldAccept,
+				nfa.Accepting(),
+			)
+		}
+
+	}
+}
