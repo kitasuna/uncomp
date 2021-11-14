@@ -1,4 +1,5 @@
 package main
+
 type State struct {
 	Label string
 }
@@ -6,4 +7,3 @@ type State struct {
 func (st *State) String() string {
 	return st.Label
 }
-

@@ -13,12 +13,12 @@ type PartcRegex struct {
 */
 
 type PRegex struct {
-	Lhs *Value `@@`
+	Lhs  *Value  `@@`
 	Tail []*Oper `@@*`
 }
 
 type Value struct {
-	Id *string `@Ident`
+	Id      *string `@Ident`
 	SubExpr *PRegex `| "(" @@ ")"`
 	// Not ideal, but leaving this as a placeholder to represent "Empty"
 	Nothing bool `| @"nil"`
@@ -32,14 +32,14 @@ type Oper struct {
 }
 
 type ChooseEx struct {
-	First *PRegex `@@`
-	Operator string `"|"`
-	Second *PRegex `@@`
+	First    *PRegex `@@`
+	Operator string  `"|"`
+	Second   *PRegex `@@`
 }
 
 type RepeatEx struct {
-	First *PRegex `@@`
-	Operator string `"*"`
+	First    *PRegex `@@`
+	Operator string  `"*"`
 }
 
 /*

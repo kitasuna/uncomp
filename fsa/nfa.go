@@ -20,6 +20,21 @@ func (rb *NFARuleBook) AdvanceStates(c *rune, sts []*State) []*State {
 	return returnStates
 }
 
+func (rb *NFARuleBook) Alphabet() []rune {
+	rs := make([]rune, 0)
+	exists := make(map[rune]bool)
+	for _, rule := range rb.Rules {
+		if rule.Char != nil {
+			if _, found := exists[*rule.Char]; !found {
+				rs = append(rs, *rule.Char)
+				exists[*rule.Char] = true
+			}
+		}
+	}
+
+	return rs
+}
+
 func (rb *NFARuleBook) FindAllRules(c *rune, st *State) []NFARule {
 	returnRules := make([]NFARule, 0)
 	for _, rule := range rb.Rules {
@@ -63,17 +78,31 @@ func IsSubsetOf(checkSet []*State, maybeSubset []*State) bool {
 	return true
 }
 
+func SetsAreEqual(s1 []*State, s2 []*State) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+
+	for _, s := range s1 {
+		if !StateInSlice(s2, s) {
+			return false
+		}
+	}
+
+	return true
+}
+
 type NFA struct {
-	RB NFARuleBook
+	RB            NFARuleBook
 	CurrentStates []*State
-	AcceptStates []*State
+	AcceptStates  []*State
 }
 
 func NewNFA(rb NFARuleBook, curr []*State, acc []*State) NFA {
-	return NFA {
-		RB: rb,
+	return NFA{
+		RB:            rb,
 		CurrentStates: curr,
-		AcceptStates: acc,
+		AcceptStates:  acc,
 	}
 }
 
@@ -100,4 +129,45 @@ func (nfa *NFA) ProcessString(str string) {
 	for _, r := range str {
 		nfa.ProcessRune(&r)
 	}
+}
+
+/*
+  As I understand it, we're slowly gonna transform this thing into a DFA sim of the NFA
+  So even though the wrapper process seems a little silly, maybe there's some long-term benefit
+  in actually doing it...
+*/
+func (nfa *NFA) SetCurrentStates(ss []*State) {
+	nfa.CurrentStates = ss
+}
+
+type NFASimulation struct {
+	Nfa NFA
+}
+
+func NewNFASim(nfa NFA) *NFASimulation {
+	return &NFASimulation{
+		Nfa: nfa,
+	}
+}
+
+func (nfas *NFASimulation) NextState(ss []*State, r *rune) []*State {
+	nfas.Nfa.SetCurrentStates(ss)
+	nfas.Nfa.ProcessRune(r)
+	return nfas.Nfa.GetCurrentStates()
+}
+
+func (nfas *NFASimulation) RulesFor(ss []*State) []NFARuleDescription {
+	alphabet := nfas.Nfa.RB.Alphabet()
+
+	rules := make([]NFARuleDescription, 0)
+	for idx, runeElem := range alphabet {
+		resultingStates := nfas.NextState(ss, &runeElem)
+		rules = append(rules, NFARuleDescription{
+			SrcStates:  ss,
+			Char:       &(alphabet[idx]),
+			DestStates: resultingStates,
+		})
+	}
+
+	return rules
 }

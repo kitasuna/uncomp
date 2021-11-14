@@ -57,7 +57,7 @@ func Test_Concat_OK(t *testing.T) {
 	literalA := Lit{'a'}
 	literalB := Lit{'b'}
 
-	concat := Concat { First: literalA, Second: literalB }
+	concat := Concat{First: literalA, Second: literalB}
 
 	nfa := concat.ToNFA()
 
@@ -72,10 +72,9 @@ func Test_Concat_FailOnIncompleteMatch(t *testing.T) {
 	literalA := Lit{'a'}
 	literalB := Lit{'b'}
 
-	concat := Concat { First: literalA, Second: literalB }
+	concat := Concat{First: literalA, Second: literalB}
 
 	nfa := concat.ToNFA()
-
 
 	nfa.ProcessString("a")
 
@@ -89,7 +88,7 @@ func Test_Concat_Recursion(t *testing.T) {
 	literalB := Lit{'b'}
 	literalC := Lit{'c'}
 
-	concat := Concat { First: literalA, Second: Concat { First: literalB, Second: literalC } }
+	concat := Concat{First: literalA, Second: Concat{First: literalB, Second: literalC}}
 
 	nfa := concat.ToNFA()
 
@@ -105,25 +104,24 @@ func Test_Concat_Choose(t *testing.T) {
 	literalB := Lit{'b'}
 	empty := Empty{}
 
-	regex := Concat {
+	regex := Concat{
 		First: literalA,
-		Second: Choose {
-			First: literalB,
+		Second: Choose{
+			First:  literalB,
 			Second: empty,
 		},
 	}
 
-
 	tests := []struct {
-		Str string
+		Str     string
 		Accepts bool
 	}{
 		{
-			Str: "a",
+			Str:     "a",
 			Accepts: true,
 		},
 		{
-			Str: "ab",
+			Str:     "ab",
 			Accepts: true,
 		},
 	}
@@ -142,7 +140,7 @@ func Test_Choose_FirstOK(t *testing.T) {
 	literalA := Lit{'a'}
 	literalB := Lit{'b'}
 
-	choose := Choose { First: literalA, Second: literalB }
+	choose := Choose{First: literalA, Second: literalB}
 
 	nfa := choose.ToNFA()
 
@@ -156,7 +154,7 @@ func Test_Choose_FirstOK(t *testing.T) {
 func Test_Choose_EmptyFirstOK(t *testing.T) {
 	literalB := Lit{'b'}
 
-	choose := Choose { First: Empty{}, Second: literalB }
+	choose := Choose{First: Empty{}, Second: literalB}
 
 	nfa := choose.ToNFA()
 
@@ -170,7 +168,7 @@ func Test_Choose_EmptyFirstOK(t *testing.T) {
 func Test_Choose_EmptySecondOK(t *testing.T) {
 	literalB := Lit{'b'}
 
-	choose := Choose { First: literalB, Second: Empty{} }
+	choose := Choose{First: literalB, Second: Empty{}}
 
 	nfa := choose.ToNFA()
 	nfa.ProcessString("b")
@@ -184,7 +182,7 @@ func Test_Choose_SecondOK(t *testing.T) {
 	literalA := Lit{'a'}
 	literalB := Lit{'b'}
 
-	choose := Choose { First: literalA, Second: literalB }
+	choose := Choose{First: literalA, Second: literalB}
 
 	nfa := choose.ToNFA()
 
@@ -199,7 +197,7 @@ func Test_Choose_Fail1(t *testing.T) {
 	literalA := Lit{'a'}
 	literalB := Lit{'b'}
 
-	choose := Choose { First: literalA, Second: literalB }
+	choose := Choose{First: literalA, Second: literalB}
 
 	nfa := choose.ToNFA()
 
@@ -214,7 +212,7 @@ func Test_Choose_Fail2(t *testing.T) {
 	literalA := Lit{'a'}
 	literalB := Lit{'b'}
 
-	choose := Choose { First: literalA, Second: literalB }
+	choose := Choose{First: literalA, Second: literalB}
 
 	nfa := choose.ToNFA()
 
@@ -228,7 +226,7 @@ func Test_Choose_Fail2(t *testing.T) {
 func Test_Repeat_EmptyOK(t *testing.T) {
 	literalA := Lit{'a'}
 
-	repeat := Repeat { Pattern: literalA }
+	repeat := Repeat{Pattern: literalA}
 
 	nfa := repeat.ToNFA()
 
@@ -242,7 +240,7 @@ func Test_Repeat_EmptyOK(t *testing.T) {
 func Test_Repeat_SingleOK(t *testing.T) {
 	literalA := Lit{'a'}
 
-	repeat := Repeat { Pattern: literalA }
+	repeat := Repeat{Pattern: literalA}
 
 	nfa := repeat.ToNFA()
 
@@ -256,7 +254,7 @@ func Test_Repeat_SingleOK(t *testing.T) {
 func Test_Repeat_MultipleOK(t *testing.T) {
 	literalA := Lit{'a'}
 
-	repeat := Repeat { Pattern: literalA }
+	repeat := Repeat{Pattern: literalA}
 
 	nfa := repeat.ToNFA()
 
@@ -270,7 +268,7 @@ func Test_Repeat_MultipleOK(t *testing.T) {
 func Test_Repeat_Fail1(t *testing.T) {
 	literalA := Lit{'a'}
 
-	repeat := Repeat { Pattern: literalA }
+	repeat := Repeat{Pattern: literalA}
 
 	nfa := repeat.ToNFA()
 
@@ -284,7 +282,7 @@ func Test_Repeat_Fail1(t *testing.T) {
 func Test_Repeat_Fail2(t *testing.T) {
 	literalA := Lit{'a'}
 
-	repeat := Repeat { Pattern: literalA }
+	repeat := Repeat{Pattern: literalA}
 
 	nfa := repeat.ToNFA()
 
@@ -298,44 +296,43 @@ func Test_Repeat_Fail2(t *testing.T) {
 func Test_BigOne(t *testing.T) {
 	literalA := Lit{'a'}
 	literalB := Lit{'b'}
-	big := Repeat {
-		Pattern: Concat {
-			First: literalA,
-			Second: Choose { First: Empty{}, Second: literalB },
+	big := Repeat{
+		Pattern: Concat{
+			First:  literalA,
+			Second: Choose{First: Empty{}, Second: literalB},
 		},
 	}
 
-
 	tests := []struct {
-		Str string
+		Str     string
 		Accepts bool
 	}{
 		{
-			Str: "a",
+			Str:     "a",
 			Accepts: true,
 		},
 		{
-			Str: "ab",
+			Str:     "ab",
 			Accepts: true,
 		},
 		{
-			Str: "ab",
+			Str:     "ab",
 			Accepts: true,
 		},
 		{
-			Str: "aba",
+			Str:     "aba",
 			Accepts: true,
 		},
 		{
-			Str: "abab",
+			Str:     "abab",
 			Accepts: true,
 		},
 		{
-			Str: "abaab",
+			Str:     "abaab",
 			Accepts: true,
 		},
 		{
-			Str: "abba",
+			Str:     "abba",
 			Accepts: false,
 		},
 	}

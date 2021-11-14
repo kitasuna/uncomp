@@ -26,7 +26,7 @@ type DFA struct {
 	CurrentState *State
 	// Which states are valid as "accept" states
 	AcceptStates []*State
-	RB DFARuleBook
+	RB           DFARuleBook
 }
 
 func (dfa *DFA) Accepting() bool {
@@ -55,7 +55,7 @@ func (dfa *DFA) ProcessString(s string) {
 
 func NewDFA(startState *State, acceptStates []*State, rb DFARuleBook) *DFA {
 	return &DFA{
-		RB: rb,
+		RB:           rb,
 		CurrentState: startState,
 
 		AcceptStates: acceptStates,

@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-
 func Test_ParserHandlesSingleRune(t *testing.T) {
 	parser, err := participle.Build(&PRegex{})
 	if err != nil {
@@ -96,7 +95,6 @@ func Test_ParserHandlesNestedRepeat(t *testing.T) {
 		t.Error(err)
 	}
 }
-
 
 func Test_ParserHandlesRepetitionWitBrackets(t *testing.T) {
 	parser, err := participle.Build(&PRegex{})

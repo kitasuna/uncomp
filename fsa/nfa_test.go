@@ -5,35 +5,36 @@ import (
 	"testing"
 )
 
-var s0 = &State { "First" }
-var s1 = &State { "Second" }
-var s2 = &State { "Third" }
-var s3 = &State { "Fourth" }
+var s0 = &State{"First"}
+var s1 = &State{"Second"}
+var s2 = &State{"Third"}
+var s3 = &State{"Fourth"}
 var inputRuneA = 'a'
 var inputRuneB = 'b'
+var inputRuneC = 'c'
 
 func Test_NFARuleBook(t *testing.T) {
-	rb := NFARuleBook {
+	rb := NFARuleBook{
 		Rules: []NFARule{
-			{ TargetState: s0, Char: &inputRuneA, NextState: s0 },
-			{ TargetState: s0, Char: &inputRuneB, NextState: s0 },
-			{ TargetState: s0, Char: &inputRuneB, NextState: s1 },
-			{ TargetState: s1, Char: &inputRuneA, NextState: s2 },
-			{ TargetState: s1, Char: &inputRuneB, NextState: s2 },
-			{ TargetState: s2, Char: &inputRuneA, NextState: s3 },
-			{ TargetState: s2, Char: &inputRuneB, NextState: s3 },
+			{TargetState: s0, Char: &inputRuneA, NextState: s0},
+			{TargetState: s0, Char: &inputRuneB, NextState: s0},
+			{TargetState: s0, Char: &inputRuneB, NextState: s1},
+			{TargetState: s1, Char: &inputRuneA, NextState: s2},
+			{TargetState: s1, Char: &inputRuneB, NextState: s2},
+			{TargetState: s2, Char: &inputRuneA, NextState: s3},
+			{TargetState: s2, Char: &inputRuneB, NextState: s3},
 		},
 	}
 
-	tests := []struct{
+	tests := []struct {
 		StartStates []*State
-		Input *rune
-		Tgt []*State
+		Input       *rune
+		Tgt         []*State
 	}{
-		{ []*State{s0}, &inputRuneB, []*State{s0, s1} },
-		{ []*State{s0}, &inputRuneA, []*State{s0} },
-		{ []*State{s0, s1}, &inputRuneA, []*State{s0, s2} },
-		{ []*State{s0, s2}, &inputRuneA, []*State{s0, s3} },
+		{[]*State{s0}, &inputRuneB, []*State{s0, s1}},
+		{[]*State{s0}, &inputRuneA, []*State{s0}},
+		{[]*State{s0, s1}, &inputRuneA, []*State{s0, s2}},
+		{[]*State{s0, s2}, &inputRuneA, []*State{s0, s3}},
 	}
 
 	for _, tt := range tests {
@@ -52,32 +53,52 @@ func Test_NFARuleBook(t *testing.T) {
 
 }
 
-func Test_NFA(t *testing.T) {
-	rb := NFARuleBook {
+func Test_NFARulebookAlphabet(t *testing.T) {
+	rb := NFARuleBook{
 		Rules: []NFARule{
-			{ TargetState: s0, Char: &inputRuneA, NextState: s0 },
-			{ TargetState: s0, Char: &inputRuneB, NextState: s0 },
-			{ TargetState: s0, Char: &inputRuneB, NextState: s1 },
-			{ TargetState: s1, Char: &inputRuneA, NextState: s2 },
-			{ TargetState: s1, Char: &inputRuneB, NextState: s2 },
-			{ TargetState: s2, Char: &inputRuneA, NextState: s3 },
-			{ TargetState: s2, Char: &inputRuneB, NextState: s3 },
+			{TargetState: s0, Char: &inputRuneA, NextState: s0},
+			{TargetState: s1, Char: &inputRuneB, NextState: s2},
+			{TargetState: s2, Char: &inputRuneC, NextState: s3},
 		},
 	}
 
-	tests := []struct{
-		StartStates []*State
+	rs := rb.Alphabet()
+	tgt := []rune{'a', 'b', 'c'}
+
+	if !reflect.DeepEqual(rs, tgt) {
+		t.Errorf("Wanted alphabet %v, got %v",
+			tgt,
+			rs,
+		)
+	}
+}
+
+func Test_NFA(t *testing.T) {
+	rb := NFARuleBook{
+		Rules: []NFARule{
+			{TargetState: s0, Char: &inputRuneA, NextState: s0},
+			{TargetState: s0, Char: &inputRuneB, NextState: s0},
+			{TargetState: s0, Char: &inputRuneB, NextState: s1},
+			{TargetState: s1, Char: &inputRuneA, NextState: s2},
+			{TargetState: s1, Char: &inputRuneB, NextState: s2},
+			{TargetState: s2, Char: &inputRuneA, NextState: s3},
+			{TargetState: s2, Char: &inputRuneB, NextState: s3},
+		},
+	}
+
+	tests := []struct {
+		StartStates  []*State
 		AcceptStates []*State
-		Input *rune
+		Input        *rune
 		ShouldAccept bool
 	}{
-		{ []*State{s0}, []*State{s1}, &inputRuneA, false },
-		{ []*State{s0}, []*State{s1}, &inputRuneB, true },
-		{ []*State{s0}, []*State{s0}, &inputRuneB, true },
-		{ []*State{s0}, []*State{s1}, &inputRuneA, false },
-		{ []*State{s0, s1}, []*State{s3}, &inputRuneA, false },
-		{ []*State{s0, s2}, []*State{s0, s3}, &inputRuneA, true},
-		{ []*State{s2}, []*State{s3}, &inputRuneA, true},
+		{[]*State{s0}, []*State{s1}, &inputRuneA, false},
+		{[]*State{s0}, []*State{s1}, &inputRuneB, true},
+		{[]*State{s0}, []*State{s0}, &inputRuneB, true},
+		{[]*State{s0}, []*State{s1}, &inputRuneA, false},
+		{[]*State{s0, s1}, []*State{s3}, &inputRuneA, false},
+		{[]*State{s0, s2}, []*State{s0, s3}, &inputRuneA, true},
+		{[]*State{s2}, []*State{s3}, &inputRuneA, true},
 	}
 
 	for _, tt := range tests {
@@ -97,34 +118,34 @@ func Test_NFA(t *testing.T) {
 }
 
 func Test_NFARBFreeMoves(t *testing.T) {
-	var s0 = &State { "Start" }
-	var s1 = &State { "Mult2_0" }
+	var s0 = &State{"Start"}
+	var s1 = &State{"Mult2_0"}
 	// var s2 = &State { "Mult2_1" }
 
-	var s3 = &State { "Mult3_0" }
+	var s3 = &State{"Mult3_0"}
 	//var s4 = &State { "Mult3_1" }
 	// var s5 = &State { "Mult3_2" }
 
-	rb := NFARuleBook {
+	rb := NFARuleBook{
 		Rules: []NFARule{
-			{ TargetState: s0, Char: nil, NextState: s1 },
-			{ TargetState: s0, Char: nil, NextState: s3 },
+			{TargetState: s0, Char: nil, NextState: s1},
+			{TargetState: s0, Char: nil, NextState: s3},
 			/*
-			{ TargetState: s1, Char: &inputRuneA, NextState: s2 },
-			{ TargetState: s2, Char: &inputRuneA, NextState: s1 },
-			{ TargetState: s3, Char: &inputRuneA, NextState: s4 },
-			{ TargetState: s4, Char: &inputRuneA, NextState: s5 },
-			{ TargetState: s5, Char: &inputRuneA, NextState: s3 },
+				{ TargetState: s1, Char: &inputRuneA, NextState: s2 },
+				{ TargetState: s2, Char: &inputRuneA, NextState: s1 },
+				{ TargetState: s3, Char: &inputRuneA, NextState: s4 },
+				{ TargetState: s4, Char: &inputRuneA, NextState: s5 },
+				{ TargetState: s5, Char: &inputRuneA, NextState: s3 },
 			*/
 		},
 	}
 
-	tests := []struct{
+	tests := []struct {
 		StartStates []*State
-		Input *rune
-		Tgt []*State
+		Input       *rune
+		Tgt         []*State
 	}{
-		{ []*State{s0}, nil, []*State{s1, s3} },
+		{[]*State{s0}, nil, []*State{s1, s3}},
 	}
 
 	for _, tt := range tests {
@@ -143,24 +164,24 @@ func Test_NFARBFreeMoves(t *testing.T) {
 }
 
 func Test_NFARBRecurseFreeMoves(t *testing.T) {
-	var stStart = &State { "Start" }
-	var stFree0 = &State { "Free0" }
-	var stFree1 = &State { "Free1" }
-	var stNotFree0 = &State { "NotFree0" }
+	var stStart = &State{"Start"}
+	var stFree0 = &State{"Free0"}
+	var stFree1 = &State{"Free1"}
+	var stNotFree0 = &State{"NotFree0"}
 
-	rb := NFARuleBook {
+	rb := NFARuleBook{
 		Rules: []NFARule{
-			{ TargetState: stStart, Char: nil, NextState: stFree0 },
-			{ TargetState: stStart, Char: nil, NextState: stFree1 },
-			{ TargetState: stStart, Char: &inputRuneA, NextState: stNotFree0 },
+			{TargetState: stStart, Char: nil, NextState: stFree0},
+			{TargetState: stStart, Char: nil, NextState: stFree1},
+			{TargetState: stStart, Char: &inputRuneA, NextState: stNotFree0},
 		},
 	}
 
-	tests := []struct{
+	tests := []struct {
 		StartStates []*State
-		Tgt []*State
+		Tgt         []*State
 	}{
-		{ []*State{stStart}, []*State{stStart, stFree0, stFree1} },
+		{[]*State{stStart}, []*State{stStart, stFree0, stFree1}},
 	}
 
 	for _, tt := range tests {
@@ -180,40 +201,40 @@ func Test_NFARBRecurseFreeMoves(t *testing.T) {
 func Test_NFAWithFreeMoves(t *testing.T) {
 	// Use the rules from the book
 	// and try processing some of those strings
-	var stStart = &State { "Start" }
-	var stBranch0_0 = &State { "Branch0_0" }
-	var stBranch0_1 = &State { "Branch0_1" }
+	var stStart = &State{"Start"}
+	var stBranch0_0 = &State{"Branch0_0"}
+	var stBranch0_1 = &State{"Branch0_1"}
 
-	var stBranch1_0 = &State { "Branch1_0" }
-	var stBranch1_1 = &State { "Branch1_1" }
-	var stBranch1_2 = &State { "Branch1_2" }
+	var stBranch1_0 = &State{"Branch1_0"}
+	var stBranch1_1 = &State{"Branch1_1"}
+	var stBranch1_2 = &State{"Branch1_2"}
 
-	rb := NFARuleBook {
+	rb := NFARuleBook{
 		Rules: []NFARule{
 			// Free moves
-			{ TargetState: stStart, Char: nil, NextState: stBranch0_0 },
-			{ TargetState: stStart, Char: nil, NextState: stBranch1_0 },
+			{TargetState: stStart, Char: nil, NextState: stBranch0_0},
+			{TargetState: stStart, Char: nil, NextState: stBranch1_0},
 			// First branch / loop
-			{ TargetState: stBranch0_0, Char: &inputRuneA, NextState: stBranch0_1 },
-			{ TargetState: stBranch0_1, Char: &inputRuneA, NextState: stBranch0_0 },
+			{TargetState: stBranch0_0, Char: &inputRuneA, NextState: stBranch0_1},
+			{TargetState: stBranch0_1, Char: &inputRuneA, NextState: stBranch0_0},
 
 			// Second branch / loop
-			{ TargetState: stBranch1_0, Char: &inputRuneA, NextState: stBranch1_1 },
-			{ TargetState: stBranch1_1, Char: &inputRuneA, NextState: stBranch1_2 },
-			{ TargetState: stBranch1_2, Char: &inputRuneA, NextState: stBranch1_0 },
+			{TargetState: stBranch1_0, Char: &inputRuneA, NextState: stBranch1_1},
+			{TargetState: stBranch1_1, Char: &inputRuneA, NextState: stBranch1_2},
+			{TargetState: stBranch1_2, Char: &inputRuneA, NextState: stBranch1_0},
 		},
 	}
 
-	tests := []struct{
-		Input string
+	tests := []struct {
+		Input        string
 		ShouldAccept bool
 	}{
-		{  "a", false },
-		{  "aa", true },
-		{  "aaa", true },
-		{  "aaaa", true },
-		{  "aaaaa", false },
-		{  "aaaaaa", true },
+		{"a", false},
+		{"aa", true},
+		{"aaa", true},
+		{"aaaa", true},
+		{"aaaaa", false},
+		{"aaaaaa", true},
 	}
 
 	startStates := []*State{stStart}
@@ -235,32 +256,31 @@ func Test_NFAWithFreeMoves(t *testing.T) {
 	}
 }
 
-func Test_NFASimulation(t *testing.T) {
-	var st1 = &State { "State1" }
-	var st2 = &State { "State2" }
-	var st3 = &State { "State3" }
+func Test_NFASimulationWarmupCheckAccept(t *testing.T) {
+	var st1 = &State{"State1"}
+	var st2 = &State{"State2"}
+	var st3 = &State{"State3"}
 
-	rb := NFARuleBook {
+	rb := NFARuleBook{
 		Rules: []NFARule{
-			{ TargetState: st1, Char: &inputRuneA, NextState: st1 },
-			{ TargetState: st1, Char: &inputRuneA, NextState: st2 },
+			{TargetState: st1, Char: &inputRuneA, NextState: st1},
+			{TargetState: st1, Char: &inputRuneA, NextState: st2},
 
-			{ TargetState: st2, Char: &inputRuneB, NextState: st3 },
+			{TargetState: st2, Char: &inputRuneB, NextState: st3},
 
-			{ TargetState: st3, Char: &inputRuneB, NextState: st1 },
-			{ TargetState: st3, Char: nil, NextState: st2 },
-
+			{TargetState: st3, Char: &inputRuneB, NextState: st1},
+			{TargetState: st3, Char: nil, NextState: st2},
 		},
 	}
 
-	tests := []struct{
-		Input string
+	tests := []struct {
+		Input        string
 		ShouldAccept bool
 	}{
-		{  "a", false },
-		{  "aa", false },
-		{  "ab", true },
-		{  "abb", true },
+		{"a", false},
+		{"aa", false},
+		{"ab", true},
+		{"abb", true},
 	}
 
 	startStates := []*State{st1}
@@ -281,4 +301,111 @@ func Test_NFASimulation(t *testing.T) {
 		}
 
 	}
+}
+
+func Test_NFASimulationWarmupCheckStates(t *testing.T) {
+	var st1 = &State{"State1"}
+	var st2 = &State{"State2"}
+	var st3 = &State{"State3"}
+
+	rb := NFARuleBook{
+		Rules: []NFARule{
+			{TargetState: st1, Char: &inputRuneA, NextState: st1},
+			{TargetState: st1, Char: &inputRuneA, NextState: st2},
+			{TargetState: st1, Char: nil, NextState: st2},
+
+			{TargetState: st2, Char: &inputRuneB, NextState: st3},
+
+			{TargetState: st3, Char: &inputRuneB, NextState: st1},
+			{TargetState: st3, Char: nil, NextState: st2},
+		},
+	}
+
+	tests := []struct {
+		Input           rune
+		StartStates     []*State
+		ResultingStates []*State
+	}{
+		{'a', []*State{st1, st2}, []*State{st1, st2}},
+		{'b', []*State{st1, st2}, []*State{st3, st2}},
+		{'b', []*State{st2, st3}, []*State{st1, st2, st3}},
+		{'b', []*State{st1, st2, st3}, []*State{st1, st2, st3}},
+		{'a', []*State{st1, st2, st3}, []*State{st1, st2}},
+	}
+
+	acceptStates := []*State{st3}
+	for _, tt := range tests {
+		nfa := NewNFA(rb, tt.StartStates, acceptStates)
+		nfas := NewNFASim(nfa)
+		resultStates := nfas.NextState(tt.StartStates, &tt.Input)
+
+		if !SetsAreEqual(resultStates, tt.ResultingStates) {
+			t.Errorf("For::\nstart states %v\ninput '%c'\nWanted %v, got %v",
+				tt.StartStates,
+				tt.Input,
+				tt.ResultingStates,
+				resultStates,
+			)
+		}
+	}
+}
+
+func Test_NFASimulationRulesFor(t *testing.T) {
+	var st1 = &State{"State1"}
+	var st2 = &State{"State2"}
+	var st3 = &State{"State3"}
+
+	rb := NFARuleBook{
+		Rules: []NFARule{
+			{TargetState: st1, Char: &inputRuneA, NextState: st1},
+			{TargetState: st1, Char: &inputRuneA, NextState: st2},
+			{TargetState: st1, Char: nil, NextState: st2},
+
+			{TargetState: st2, Char: &inputRuneB, NextState: st3},
+
+			{TargetState: st3, Char: &inputRuneB, NextState: st1},
+			{TargetState: st3, Char: nil, NextState: st2},
+		},
+	}
+
+	nfa := NewNFA(rb, []*State{st1}, []*State{st1})
+	nfas := NewNFASim(nfa)
+
+	tests := []struct {
+		StartStates      []*State
+		RuleDescriptions []NFARuleDescription
+	}{
+		{
+			[]*State{st1, st2},
+			[]NFARuleDescription{
+				{
+					SrcStates:  []*State{st1, st2},
+					Char:       &inputRuneA,
+					DestStates: []*State{st1, st2},
+				},
+				{
+					SrcStates:  []*State{st1, st2},
+					Char:       &inputRuneB,
+					DestStates: []*State{st3, st2},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		rules := nfas.RulesFor(tt.StartStates)
+		if !reflect.DeepEqual(rules, tt.RuleDescriptions) {
+			t.Errorf("For::\nstart states %v\nwanted %v\ngot %v",
+				tt.StartStates,
+				tt.RuleDescriptions,
+				rules,
+			)
+
+		}
+	}
+
+}
+
+func Test_NFASimulationDiscover(t *testing.T) {
+	t.Errorf("Do this implementation next")
 }

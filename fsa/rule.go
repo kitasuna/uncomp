@@ -6,8 +6,8 @@ import (
 
 type Rule struct {
 	TargetState *State
-	Char rune
-	NextState *State
+	Char        rune
+	NextState   *State
 }
 
 func (r *Rule) AppliesTo(c rune, st *State) bool {
@@ -26,12 +26,12 @@ func (r *Rule) Follow() *State {
 // without breaking the DFA implementation
 type NFARule struct {
 	TargetState *State
-	Char *rune
-	NextState *State
+	Char        *rune
+	NextState   *State
 }
 
 func (r *NFARule) AppliesTo(c *rune, st *State) bool {
-	if(r.TargetState == st) {
+	if r.TargetState == st {
 		if c == nil && r.Char == nil {
 			return true
 		} else if (c == nil) || (r.Char == nil) {
@@ -54,4 +54,19 @@ func (r NFARule) String() string {
 
 func (r *NFARule) Follow() *State {
 	return r.NextState
+}
+
+// Using this to have rules that go from a set of states to another set of states
+type NFARuleDescription struct {
+	SrcStates  []*State
+	Char       *rune
+	DestStates []*State
+}
+
+func (r NFARuleDescription) String() string {
+	if r.Char != nil {
+		return fmt.Sprintf("%v -- %v ---> %v", r.SrcStates, string(*r.Char), r.DestStates)
+	}
+
+	return fmt.Sprintf("%v -- <nil> ---> %v", r.SrcStates, r.DestStates)
 }

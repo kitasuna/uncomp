@@ -19,45 +19,43 @@ func bracket(pattern Regex, otherPrecedence int) string {
 	return pattern.String()
 }
 
-type Empty struct {}
+type Empty struct{}
 
 func (e Empty) String() string {
-  return ""
+	return ""
 }
 
-func (e Empty) ToNFA() NFA{
-	rulebook := NFARuleBook{ Rules: []NFARule{} }
-	startState := &State{ Label: "EmptyStart" }
+func (e Empty) ToNFA() NFA {
+	rulebook := NFARuleBook{Rules: []NFARule{}}
+	startState := &State{Label: "EmptyStart"}
 	return NewNFA(rulebook, []*State{startState}, []*State{startState})
 }
 
 func (e Empty) GetPrecedence() int {
-  return 3
+	return 3
 }
 
-
 type Lit struct {
-  r rune
+	r rune
 }
 
 func (l Lit) String() string {
-  return string(l.r)
+	return string(l.r)
 }
 
-
 func (l Lit) GetPrecedence() int {
-  return 3
+	return 3
 }
 
 func (l Lit) ToNFA() NFA {
-	startState := &State { Label: fmt.Sprintf("Start(%v)", string(l.r)) }
-	readSingleRuneState := &State { Label: fmt.Sprintf("readSingleRune%v", string(l.r)) }
+	startState := &State{Label: fmt.Sprintf("Start(%v)", string(l.r))}
+	readSingleRuneState := &State{Label: fmt.Sprintf("readSingleRune%v", string(l.r))}
 	rulebook := NFARuleBook{
 		Rules: []NFARule{
 			{
 				TargetState: startState,
-				Char: &l.r,
-				NextState: readSingleRuneState,
+				Char:        &l.r,
+				NextState:   readSingleRuneState,
 			},
 		},
 	}
@@ -66,7 +64,7 @@ func (l Lit) ToNFA() NFA {
 }
 
 type Concat struct {
-	First Regex
+	First  Regex
 	Second Regex
 }
 
@@ -87,20 +85,20 @@ func (c Concat) ToNFA() NFA {
 
 	var freeMoves []NFARule
 	for _, st := range nfa1.AcceptStates {
-		freeMoves = append(freeMoves, NFARule{ TargetState: st, Char: nil, NextState: nfa2.CurrentStates[0] })
+		freeMoves = append(freeMoves, NFARule{TargetState: st, Char: nil, NextState: nfa2.CurrentStates[0]})
 	}
 
 	combinedRules = append(combinedRules, freeMoves...)
 
 	return NewNFA(
-		NFARuleBook{ Rules: combinedRules },
+		NFARuleBook{Rules: combinedRules},
 		[]*State{nfa1.CurrentStates[0]},
 		nfa2.AcceptStates,
 	)
 }
 
 type Choose struct {
-	First Regex
+	First  Regex
 	Second Regex
 }
 
@@ -118,23 +116,23 @@ func (c Choose) GetPrecedence() int {
 	return 0
 }
 
-func (c Choose) ToNFA() NFA{
+func (c Choose) ToNFA() NFA {
 	nfa1 := c.First.ToNFA()
 	nfa2 := c.Second.ToNFA()
 	rules1 := nfa1.RB.Rules
 	combinedRules := append(rules1, nfa2.RB.Rules...)
 
 	initState := &State{"StartChoose"}
-	combinedRules = append(combinedRules, NFARule{ TargetState: initState, Char: nil, NextState: nfa1.CurrentStates[0] })
-	combinedRules = append(combinedRules, NFARule{ TargetState: initState, Char: nil, NextState: nfa2.CurrentStates[0] })
+	combinedRules = append(combinedRules, NFARule{TargetState: initState, Char: nil, NextState: nfa1.CurrentStates[0]})
+	combinedRules = append(combinedRules, NFARule{TargetState: initState, Char: nil, NextState: nfa2.CurrentStates[0]})
 
 	var acceptStates []*State
 	acceptStates = append(acceptStates, nfa1.AcceptStates...)
 	acceptStates = append(acceptStates, nfa2.AcceptStates...)
 
 	return NewNFA(
-		NFARuleBook{ Rules: combinedRules },
-		[]*State{ initState },
+		NFARuleBook{Rules: combinedRules},
+		[]*State{initState},
 		acceptStates,
 	)
 }
@@ -151,23 +149,23 @@ func (r Repeat) GetPrecedence() int {
 	return 2
 }
 
-func (r Repeat) ToNFA() NFA{
+func (r Repeat) ToNFA() NFA {
 	nfa := r.Pattern.ToNFA()
 
 	// Adding this so it can accept the empty string
-	addlStartState := &State{ "StartAcceptsEmpty" }
+	addlStartState := &State{"StartAcceptsEmpty"}
 
 	combinedRules := nfa.RB.Rules
 	for _, s := range nfa.AcceptStates {
 		combinedRules = append(combinedRules,
-		NFARule{TargetState: s, Char: nil, NextState:addlStartState},
+			NFARule{TargetState: s, Char: nil, NextState: addlStartState},
 		)
 	}
 	combinedRules = append(combinedRules,
 		NFARule{TargetState: addlStartState, Char: nil, NextState: nfa.CurrentStates[0]},
 	)
 	return NewNFA(
-		NFARuleBook{ Rules: combinedRules },
+		NFARuleBook{Rules: combinedRules},
 		[]*State{addlStartState},
 		append(nfa.AcceptStates, addlStartState),
 	)
